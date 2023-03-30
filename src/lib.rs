@@ -1,5 +1,3 @@
-use std::fmt::Error;
-
 use cpython::py_module_initializer;
 use reqwest::Url;
 use exitfailure::ExitFailure;
@@ -44,16 +42,16 @@ struct Submission {
     uname: String
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct UserSubmission {
     name: String,
     uname: String,
-    subs: Vec<Vec<u128>>
+    subs: Vec<Vec<u64>>
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 struct UserRank {
-    rank: u16,
+    rank: u32,
     old: u8,
     userid: u32,
     name: String,
@@ -98,7 +96,7 @@ async fn get_user_submissions(uid: u32, count: u16) -> Result<UserSubmission, Ex
     Ok(usubs)
 }
 
-async fn get_ranking(uid: u32, above: u8, below: u8) -> Result<Vec<UserRank>, ExitFailure> {
+async fn get_ranking(uid: u32, above: u16, below: u16) -> Result<Vec<UserRank>, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/ranklist/{uid}/{above}/{below}"
     );
@@ -120,15 +118,15 @@ async fn get_uid_from_uname(uname: String) -> Result<u32, ExitFailure> {
     Ok(uid)
 }
 
-fn get_pdf_url_from_problem(num: String) -> Result<String, Error> {
+fn get_pdf_url_from_problem(num: String) -> String {
     let prelude = match num.len() {
         3 => &num[..1],
         4 => &num[..2],
         5 => &num[..3],
-        _ => return Error("Num lenght does not seem right"),
+        _ => &num[..3],
     };
 
-    Ok(format!("https://onlinejudge.org/external/{prelude}/{num}.pdf"))
+    format!("https://onlinejudge.org/external/{prelude}/{num}.pdf")
 
 }
 
@@ -142,5 +140,40 @@ mod tests {
     async fn test_get_a_problem() {
         let prob_462: Problem = get_problem(462).await.unwrap();
         assert_eq!(prob_462.pid, 403)
+    }
+
+    #[actix_rt::test]
+    async fn test_get_submissions() {
+        let subs: Vec<Submission> = get_submissions_problem(403, 1, 2).await.unwrap();
+        assert_eq!(subs[0].sid, 1065763);
+    }
+
+    #[actix_rt::test]
+    async fn test_user_submissions() {
+        let subs: UserSubmission = get_user_submissions(1589052, 1).await.unwrap();
+        let vec: Vec<Vec<u64>> = vec![vec![28344490, 1587, 90, 360, 1680048279, 2, 3052]];
+        let expected = UserSubmission {
+            name: String::from("Marcos"),
+            uname: String::from("LovetheFrogs"),
+            subs: vec,
+        };
+
+        assert_eq!(expected, subs);
+    }
+
+    #[actix_rt::test]
+    async fn test_get_ranking() {
+        let rank = get_ranking(1589052, 1, 1).await.unwrap();
+        assert_eq!(rank[0].name, String::from("abigail"));
+    }
+
+    #[actix_rt::test]
+    async fn test_uid_from_uname() {
+        assert_eq!(get_uid_from_uname(String::from("LovetheFrogs")).await.unwrap(), 1589052);
+    }
+
+    #[test]
+    async fn test_get_pdf_url() {
+        assert_eq!(get_pdf_url_from_problem(String::from("462")), String::from("https://onlinejudge.org/external/4/462.pdf"));
     }
 }
