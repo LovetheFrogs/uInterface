@@ -151,7 +151,8 @@ py_module_initializer!(u_interface, |py, m| {
     m.add(py, "__doc__", "Python module written in Rust to make requests to uHunt's API")?;
     m.add(py, "get_problem", py_fn!(py, get_problem_py(num: u16)))?;
     m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
-    m.add(py, "get_user_submissions", py_fn!(py, ))
+    m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
+    Ok(())
 });
 
 
@@ -225,51 +226,36 @@ fn get_pdf_url_from_problem(num: String) -> String {
 
 
 fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let mut contents: Problem;
-    rt.block_on(async {
-        contents = get_problem(num).await.unwrap();
-    });
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_problem(num)).unwrap();
 
     Ok(contents)
 }
 
 fn get_submissions_py(_: Python<'_>, pid: u16, start: u16, end: u16) -> PyResult<Vec<Submission>> {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let mut contents: Vec<Submission>;
-    rt.block_on(async {
-        contents = get_submissions_problem(pid, start, end).await.unwrap();
-    });
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_submissions_problem(pid, start, end)).unwrap();
     
     Ok(contents)
 }
 
 fn get_user_subs_py(_: Python<'_>, uid: u32, count: u16) -> PyResult<UserSubmission> {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let mut contents: UserSubmission;
-    rt.block_on(async {
-        contents = get_user_submissions(uid, count).await.unwrap();
-    });
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_user_submissions(uid, count)).unwrap();
     
     Ok(contents)
 }
 
 fn get_ranking_py(_: Python<'_>, uid: u32, above: u16, below: u16) -> PyResult<Vec<UserRank>> {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let mut contents: Vec<UserRank>;
-    rt.block_on(async {
-        contents = get_ranking(uid, above, below).await.unwrap();
-    });
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_ranking(uid, above, below)).unwrap();
     
     Ok(contents)
 }
 
 fn get_uid_py(_: Python<'_>, uname: String) -> PyResult<u32> {
     let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let mut contents: u32;
-    rt.block_on(async {
-        contents = get_uid_from_uname(uname).await.unwrap();
-    });
+    let mut contents = rt.block_on(get_uid_from_uname(uname)).unwrap();
     
     Ok(contents)
 }
