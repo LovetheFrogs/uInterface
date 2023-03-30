@@ -1,16 +1,16 @@
-use cpython::{PyResult, Python, py_module_initializer, py_fn, ToPyObject};
+use cpython::{PyResult, Python, py_module_initializer, py_fn, ToPyObject, PyDict, PyObject, PyList};
 use reqwest::Url;
 use exitfailure::ExitFailure;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, ToPyObject)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Problem {
     pid: u16,
     num: u16,
     title: String,
     dacu: u32,
-    mrun: u128,
-    mmem: u128,
+    mrun: u64,
+    mmem: u64,
     nover: u16,
     sube: u16,
     noj: u16,
@@ -28,6 +28,38 @@ struct Problem {
     rej: i32,
 }
 
+impl ToPyObject for Problem {
+    type ObjectType = PyDict;
+    
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+
+        dict.set_item(py, "pid", self.pid).unwrap();
+        dict.set_item(py, "num", self.num).unwrap();
+        dict.set_item(py, "title", self.title.to_py_object(py)).unwrap();
+        dict.set_item(py, "dacu", self.dacu).unwrap();
+        dict.set_item(py, "mrun", self.mrun).unwrap();
+        dict.set_item(py, "mmem", self.mmem).unwrap();
+        dict.set_item(py, "nover", self.nover).unwrap();
+        dict.set_item(py, "sube", self.sube).unwrap();
+        dict.set_item(py, "noj", self.noj).unwrap();
+        dict.set_item(py, "inq", self.inq).unwrap();
+        dict.set_item(py, "ce", self.ce).unwrap();
+        dict.set_item(py, "rf", self.rf).unwrap();
+        dict.set_item(py, "re", self.re).unwrap();
+        dict.set_item(py, "ole", self.ole).unwrap();
+        dict.set_item(py, "tle", self.tle).unwrap();
+        dict.set_item(py, "wa", self.wa).unwrap();
+        dict.set_item(py, "pe", self.pe).unwrap();
+        dict.set_item(py, "ac", self.ac).unwrap();
+        dict.set_item(py, "rtl", self.rtl).unwrap();
+        dict.set_item(py, "status", self.status).unwrap();
+        dict.set_item(py, "rej", self.rej).unwrap();
+
+        dict
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct Submission {
     sid: i64,
@@ -35,11 +67,32 @@ struct Submission {
     ver: u16,
     lan: u8,
     run: u64,
-    mem: u128,
+    mem: u64,
     rank: u16,
-    sbt: u128,
+    sbt: u64,
     name: String,
     uname: String
+}
+
+impl ToPyObject for Submission {
+    type ObjectType = PyDict;
+
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+
+        dict.set_item(py, "sid", self.sid).unwrap();
+        dict.set_item(py, "pid", self.pid).unwrap();
+        dict.set_item(py, "ver", self.ver).unwrap();
+        dict.set_item(py, "lan", self.lan).unwrap();
+        dict.set_item(py, "run", self.run).unwrap();
+        dict.set_item(py, "mem", self.mem).unwrap();
+        dict.set_item(py, "rank", self.rank).unwrap();
+        dict.set_item(py, "sbt", self.sbt).unwrap();
+        dict.set_item(py, "name", self.name.to_py_object(py)).unwrap();
+        dict.set_item(py, "uname", self.uname.to_py_object(py)).unwrap();
+
+        dict
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -47,6 +100,20 @@ struct UserSubmission {
     name: String,
     uname: String,
     subs: Vec<Vec<u64>>
+}
+
+impl ToPyObject for UserSubmission {
+    type ObjectType = PyDict;
+
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+        
+        dict.set_item(py, "name", self.name.to_py_object(py)).unwrap();
+        dict.set_item(py, "uname", self.uname.to_py_object(py)).unwrap();
+        dict.set_item(py, "subs", self.subs.to_py_object(py)).unwrap();
+        
+        dict
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -61,6 +128,24 @@ struct UserRank {
     activity: Vec<u16>
 }
 
+impl ToPyObject for UserRank {
+    type ObjectType = PyDict;
+
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+
+        dict.set_item(py, "rank", self.rank).unwrap();
+        dict.set_item(py, "old", self.old).unwrap();
+        dict.set_item(py, "userid", self.userid).unwrap();
+        dict.set_item(py, "name", self.name.to_py_object(py)).unwrap();
+        dict.set_item(py, "username", self.username.to_py_object(py)).unwrap();
+        dict.set_item(py, "ac", self.ac).unwrap();
+        dict.set_item(py, "nos", self.nos).unwrap();
+        dict.set_item(py, "activity", self.activity.to_py_object(py)).unwrap();
+
+        dict
+    }
+}
 
 py_module_initializer!(u_interface, |py, m| {
     m.add(py, "__doc__", "Python module written in Rust to make requests to uHunt's API")?;
