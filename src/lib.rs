@@ -1,3 +1,5 @@
+use std::fmt::Error;
+
 use cpython::py_module_initializer;
 use reqwest::Url;
 use exitfailure::ExitFailure;
@@ -116,4 +118,29 @@ async fn get_uid_from_uname(uname: String) -> Result<u32, ExitFailure> {
     let uid = reqwest::get(url).await?.json::<u32>().await?;
 
     Ok(uid)
+}
+
+fn get_pdf_url_from_problem(num: String) -> Result<String, Error> {
+    let prelude = match num.len() {
+        3 => &num[..1],
+        4 => &num[..2],
+        5 => &num[..3],
+        _ => return Error("Num lenght does not seem right"),
+    };
+
+    Ok(format!("https://onlinejudge.org/external/{prelude}/{num}.pdf"))
+
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_rt::test;
+
+    #[actix_rt::test]
+    async fn test_get_a_problem() {
+        let prob_462: Problem = get_problem(462).await.unwrap();
+        assert_eq!(prob_462.pid, 403)
+    }
 }
