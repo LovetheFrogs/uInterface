@@ -156,3 +156,5 @@ class Profile:
             master.sub_label.grid(row=1, column=1, padx=20, pady=10)
             build_submission_table(master)
             build_ranking_table(master)
+
+            master.generated_data[1] = True

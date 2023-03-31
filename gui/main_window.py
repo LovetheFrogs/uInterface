@@ -18,7 +18,7 @@ class MainWindow(ctk.CTk):
         self.user = None
         self.uid = None
         self.NUM_DATA = 5
-        self.generated = [True, False, False, False, False]
+        self.generated_data = [True, False, False, False, False]
 
         # Configure window
         self.title("UVa Judge")
