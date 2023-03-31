@@ -105,35 +105,34 @@ def build_submission_table(master):
     master.table.tag_configure("#FFFF99", background="#FFFF99", foreground="black")
     master.table.tag_configure("#9999FF", background="#9999FF", foreground="black")
     master.table.tag_configure("#E6E6E6", background="#E6E6E6", foreground="black")
-    master.table.tag_configure
-    master.table.grid(row=2, column=1, padx=20, pady=10)
+    master.table.grid(row=2, rowspan=1, column=1, padx=20, pady=10)
 
 
 def build_ranking_table(master):
     data = ui.get_ranking(master.uid, master.NUM_DATA // 2, master.NUM_DATA // 2)
     a = data[0]
 
-    master.table = ttk.Treeview(master, columns=("Rank", "Username", "AC", "Subs"), show="headings",
-                                displaycolumns=(0, 1, 2, 3))
-    master.table.heading("Rank", text="Rank")
-    master.table.heading("Username", text="Username")
-    master.table.heading("AC", text="AC")
-    master.table.heading("Subs", text="Subs")
-    master.table.column("Rank", width=100, anchor="center")
-    master.table.column("Username", width=300, anchor="center")
-    master.table.column("AC", width=100, anchor="center")
-    master.table.column("Subs", width=100, anchor="center")
-    master.table.config(height=master.NUM_DATA)
+    master.table2 = ttk.Treeview(master, columns=("Rank", "Username", "AC", "Subs"), show="headings",
+                                 displaycolumns=(0, 1, 2, 3))
+    master.table2.heading("Rank", text="Rank")
+    master.table2.heading("Username", text="Username")
+    master.table2.heading("AC", text="AC")
+    master.table2.heading("Subs", text="Subs")
+    master.table2.column("Rank", width=100, anchor="center")
+    master.table2.column("Username", width=300, anchor="center")
+    master.table2.column("AC", width=100, anchor="center")
+    master.table2.column("Subs", width=100, anchor="center")
+    master.table2.config(height=master.NUM_DATA)
 
     for item in data:
         if item["username"] == master.user:
             bg_color = "#D3D3D3"  # darker grey
         else:
             bg_color = "white"
-        master.table.insert("", "end", values=(item["rank"], item["username"], item["ac"], item["nos"]), tags=bg_color)
+        master.table2.insert("", "end", values=(item["rank"], item["username"], item["ac"], item["nos"]), tags=bg_color)
 
-    master.table.tag_configure("#D3D3D3", background="#D3D3D3", foreground="black")
-    master.table.grid(row=5, column=1, padx=20, pady=10)
+    master.table2.tag_configure("#D3D3D3", background="#D3D3D3", foreground="black")
+    master.table2.grid(row=3, rowspan=1, column=1, padx=20, pady=10, sticky="n")
 
 
 class Profile:
@@ -148,19 +147,12 @@ class Profile:
             master.login_btn = ctk.CTkButton(master, text="Login", command=lambda: login(master))
             master.login_btn.grid(row=3, column=1, padx=10, pady=10, sticky="n")
         else:
-            master.grid_rowconfigure((0, 10), weight=0)
-
             master.welcome_label = ctk.CTkLabel(master, text=f'Welcome {master.user}!')
             master.welcome_label.configure(font=("Arial", 20, "bold"))
             master.welcome_label.grid(row=0, column=1, padx=20, pady=10, sticky="n")
 
-            master.sub_label = ctk.CTkLabel(master, text="Your last submissions")
+            master.sub_label = ctk.CTkLabel(master, text="Your last submissions & ranking position")
             master.sub_label.configure(font=("Arial", 18, "bold"))
             master.sub_label.grid(row=1, column=1, padx=20, pady=10)
             build_submission_table(master)
-
-            master.rank_label = ctk.CTkLabel(master, text="Your ranking position")
-            master.rank_label.configure(font=("Arial", 18, "bold"))
-            master.rank_label.grid(row=4, column=1, padx=20, pady=10)
             build_ranking_table(master)
-            master.profile_generated[1] = True
