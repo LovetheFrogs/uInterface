@@ -15,6 +15,10 @@ class MainWindow(ctk.CTk):
 
         # Configure window logic
         self.screens = [True, False, False, False, False]
+        self.user = None
+        self.uid = None
+        self.NUM_DATA = 5
+        self.generated = [True, False, False, False, False]
 
         # Configure window
         self.title("UVa Judge")
@@ -48,7 +52,7 @@ class MainWindow(ctk.CTk):
         if self.screens[0]:
             return
         else:
-            self.clear
+            self.clear()
             Home(self)
             for i in range(NUM_OF_WINDOWS):
                 self.screens[i] = False
