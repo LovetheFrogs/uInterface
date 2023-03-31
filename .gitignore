@@ -16,3 +16,4 @@ Cargo.lock
 .env
 .github
 .idea
+__pycache__
