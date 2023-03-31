@@ -1,0 +1,2 @@
+def initWindow():
+    return None
