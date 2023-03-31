@@ -99,7 +99,7 @@ impl ToPyObject for Submission {
 struct UserSubmission {
     name: String,
     uname: String,
-    subs: Vec<Vec<u64>>
+    subs: Vec<Vec<i64>>
 }
 
 impl ToPyObject for UserSubmission {
@@ -312,7 +312,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_user_submissions() {
         let subs: UserSubmission = get_user_submissions(1589052, 1).await.unwrap();
-        let vec: Vec<Vec<u64>> = vec![vec![28344490, 1587, 90, 360, 1680048279, 2, 3052]];
+        let vec: Vec<Vec<i64>> = vec![vec![28344490, 1587, 90, 360, 1680048279, 2, 3052]];
         let expected = UserSubmission {
             name: String::from("Marcos"),
             uname: String::from("LovetheFrogs"),
