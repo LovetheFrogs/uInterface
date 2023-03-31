@@ -152,6 +152,9 @@ py_module_initializer!(u_interface, |py, m| {
     m.add(py, "get_problem", py_fn!(py, get_problem_py(num: u16)))?;
     m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
     m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
+    m.add(py, "get_ranking", py_fn!(py, get_ranking_py(uid: u32, above: u16, below: u16)))?;
+    m.add(py, "get_uid", py_fn!(py, get_uid_py(uname: String)))?;
+    m.add(py, "get_pdf_url", py_fn!(py, get_pdf_url_py(num: String)))?;
     Ok(())
 });
 
