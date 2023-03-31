@@ -150,6 +150,7 @@ impl ToPyObject for UserRank {
 py_module_initializer!(u_interface, |py, m| {
     m.add(py, "__doc__", "Python module written in Rust to make requests to uHunt's API")?;
     m.add(py, "get_problem", py_fn!(py, get_problem_py(num: u16)))?;
+    m.add(py, "get_problem_pid", py_fn!(py, get_problem_by_pid_py(pid: u16)))?;
     m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
     m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
     m.add(py, "get_ranking", py_fn!(py, get_ranking_py(uid: u32, above: u16, below: u16)))?;
@@ -163,6 +164,17 @@ async fn get_problem(num: u16) -> Result<Problem, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/p/num/{}",
         num
+    );
+
+    let url = Url::parse(&*url)?;
+    let prob = reqwest::get(url).await?.json::<Problem>().await?;
+
+    Ok(prob)
+}
+
+async fn get_problem_by_pid(pid: u16) -> Result<Problem, ExitFailure> {
+    let url = format!(
+        "https://uhunt.onlinejudge.org/api/p/id/{pid}",
     );
 
     let url = Url::parse(&*url)?;
@@ -235,6 +247,13 @@ fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
     Ok(contents)
 }
 
+fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_problem_by_pid(pid)).unwrap();
+
+    Ok(contents)
+}
+
 fn get_submissions_py(_: Python<'_>, pid: u16, start: u16, end: u16) -> PyResult<Vec<Submission>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_submissions_problem(pid, start, end)).unwrap();
@@ -276,6 +295,12 @@ mod tests {
     async fn test_get_a_problem() {
         let prob_462: Problem = get_problem(462).await.unwrap();
         assert_eq!(prob_462.pid, 403)
+    }
+
+    #[actix_rt::test]
+    async fn test_get_problem_by_pid() {
+        let prob_462: Problem = get_problem_by_pid(403).await.unwrap();
+        assert_eq!(prob_462.num, 462)
     }
 
     #[actix_rt::test]
