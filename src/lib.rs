@@ -1,4 +1,4 @@
-use cpython::py_module_initializer;
+use cpython::{PyResult, Python, py_module_initializer, py_fn, ToPyObject, PyDict, PyObject, PyList};
 use reqwest::Url;
 use exitfailure::ExitFailure;
 use serde_derive::{Deserialize, Serialize};
@@ -9,8 +9,8 @@ struct Problem {
     num: u16,
     title: String,
     dacu: u32,
-    mrun: u128,
-    mmem: u128,
+    mrun: u64,
+    mmem: u64,
     nover: u16,
     sube: u16,
     noj: u16,
@@ -28,6 +28,38 @@ struct Problem {
     rej: i32,
 }
 
+impl ToPyObject for Problem {
+    type ObjectType = PyDict;
+    
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+
+        dict.set_item(py, "pid", self.pid).unwrap();
+        dict.set_item(py, "num", self.num).unwrap();
+        dict.set_item(py, "title", self.title.to_py_object(py)).unwrap();
+        dict.set_item(py, "dacu", self.dacu).unwrap();
+        dict.set_item(py, "mrun", self.mrun).unwrap();
+        dict.set_item(py, "mmem", self.mmem).unwrap();
+        dict.set_item(py, "nover", self.nover).unwrap();
+        dict.set_item(py, "sube", self.sube).unwrap();
+        dict.set_item(py, "noj", self.noj).unwrap();
+        dict.set_item(py, "inq", self.inq).unwrap();
+        dict.set_item(py, "ce", self.ce).unwrap();
+        dict.set_item(py, "rf", self.rf).unwrap();
+        dict.set_item(py, "re", self.re).unwrap();
+        dict.set_item(py, "ole", self.ole).unwrap();
+        dict.set_item(py, "tle", self.tle).unwrap();
+        dict.set_item(py, "wa", self.wa).unwrap();
+        dict.set_item(py, "pe", self.pe).unwrap();
+        dict.set_item(py, "ac", self.ac).unwrap();
+        dict.set_item(py, "rtl", self.rtl).unwrap();
+        dict.set_item(py, "status", self.status).unwrap();
+        dict.set_item(py, "rej", self.rej).unwrap();
+
+        dict
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct Submission {
     sid: i64,
@@ -35,18 +67,53 @@ struct Submission {
     ver: u16,
     lan: u8,
     run: u64,
-    mem: u128,
+    mem: u64,
     rank: u16,
-    sbt: u128,
+    sbt: u64,
     name: String,
     uname: String
+}
+
+impl ToPyObject for Submission {
+    type ObjectType = PyDict;
+
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+
+        dict.set_item(py, "sid", self.sid).unwrap();
+        dict.set_item(py, "pid", self.pid).unwrap();
+        dict.set_item(py, "ver", self.ver).unwrap();
+        dict.set_item(py, "lan", self.lan).unwrap();
+        dict.set_item(py, "run", self.run).unwrap();
+        dict.set_item(py, "mem", self.mem).unwrap();
+        dict.set_item(py, "rank", self.rank).unwrap();
+        dict.set_item(py, "sbt", self.sbt).unwrap();
+        dict.set_item(py, "name", self.name.to_py_object(py)).unwrap();
+        dict.set_item(py, "uname", self.uname.to_py_object(py)).unwrap();
+
+        dict
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct UserSubmission {
     name: String,
     uname: String,
-    subs: Vec<Vec<u64>>
+    subs: Vec<Vec<i64>>
+}
+
+impl ToPyObject for UserSubmission {
+    type ObjectType = PyDict;
+
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+        
+        dict.set_item(py, "name", self.name.to_py_object(py)).unwrap();
+        dict.set_item(py, "uname", self.uname.to_py_object(py)).unwrap();
+        dict.set_item(py, "subs", self.subs.to_py_object(py)).unwrap();
+        
+        dict
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -61,11 +128,53 @@ struct UserRank {
     activity: Vec<u16>
 }
 
+impl ToPyObject for UserRank {
+    type ObjectType = PyDict;
+
+    fn to_py_object(&self, py: Python) -> PyDict {
+        let dict = PyDict::new(py);
+
+        dict.set_item(py, "rank", self.rank).unwrap();
+        dict.set_item(py, "old", self.old).unwrap();
+        dict.set_item(py, "userid", self.userid).unwrap();
+        dict.set_item(py, "name", self.name.to_py_object(py)).unwrap();
+        dict.set_item(py, "username", self.username.to_py_object(py)).unwrap();
+        dict.set_item(py, "ac", self.ac).unwrap();
+        dict.set_item(py, "nos", self.nos).unwrap();
+        dict.set_item(py, "activity", self.activity.to_py_object(py)).unwrap();
+
+        dict
+    }
+}
+
+py_module_initializer!(u_interface, |py, m| {
+    m.add(py, "__doc__", "Python module written in Rust to make requests to uHunt's API")?;
+    m.add(py, "get_problem", py_fn!(py, get_problem_py(num: u16)))?;
+    m.add(py, "get_problem_pid", py_fn!(py, get_problem_by_pid_py(pid: u16)))?;
+    m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
+    m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
+    m.add(py, "get_ranking", py_fn!(py, get_ranking_py(uid: u32, above: u16, below: u16)))?;
+    m.add(py, "get_uid", py_fn!(py, get_uid_py(uname: String)))?;
+    m.add(py, "get_pdf_url", py_fn!(py, get_pdf_url_py(num: String)))?;
+    Ok(())
+});
+
 
 async fn get_problem(num: u16) -> Result<Problem, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/p/num/{}",
         num
+    );
+
+    let url = Url::parse(&*url)?;
+    let prob = reqwest::get(url).await?.json::<Problem>().await?;
+
+    Ok(prob)
+}
+
+async fn get_problem_by_pid(pid: u16) -> Result<Problem, ExitFailure> {
+    let url = format!(
+        "https://uhunt.onlinejudge.org/api/p/id/{pid}",
     );
 
     let url = Url::parse(&*url)?;
@@ -131,6 +240,52 @@ fn get_pdf_url_from_problem(num: String) -> String {
 }
 
 
+fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_problem(num)).unwrap();
+
+    Ok(contents)
+}
+
+fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_problem_by_pid(pid)).unwrap();
+
+    Ok(contents)
+}
+
+fn get_submissions_py(_: Python<'_>, pid: u16, start: u16, end: u16) -> PyResult<Vec<Submission>> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_submissions_problem(pid, start, end)).unwrap();
+    
+    Ok(contents)
+}
+
+fn get_user_subs_py(_: Python<'_>, uid: u32, count: u16) -> PyResult<UserSubmission> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_user_submissions(uid, count)).unwrap();
+    
+    Ok(contents)
+}
+
+fn get_ranking_py(_: Python<'_>, uid: u32, above: u16, below: u16) -> PyResult<Vec<UserRank>> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_ranking(uid, above, below)).unwrap();
+    
+    Ok(contents)
+}
+
+fn get_uid_py(_: Python<'_>, uname: String) -> PyResult<u32> {
+    let mut rt = tokio::runtime::Runtime::new().unwrap();
+    let mut contents = rt.block_on(get_uid_from_uname(uname)).unwrap();
+    
+    Ok(contents)
+}
+
+fn get_pdf_url_py(_: Python, num: String) -> PyResult<String> {
+    Ok(get_pdf_url_from_problem(num))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,6 +298,12 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_get_problem_by_pid() {
+        let prob_462: Problem = get_problem_by_pid(403).await.unwrap();
+        assert_eq!(prob_462.num, 462)
+    }
+
+    #[actix_rt::test]
     async fn test_get_submissions() {
         let subs: Vec<Submission> = get_submissions_problem(403, 1, 2).await.unwrap();
         assert_eq!(subs[0].sid, 1065763);
@@ -151,7 +312,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_user_submissions() {
         let subs: UserSubmission = get_user_submissions(1589052, 1).await.unwrap();
-        let vec: Vec<Vec<u64>> = vec![vec![28344490, 1587, 90, 360, 1680048279, 2, 3052]];
+        let vec: Vec<Vec<i64>> = vec![vec![28344490, 1587, 90, 360, 1680048279, 2, 3052]];
         let expected = UserSubmission {
             name: String::from("Marcos"),
             uname: String::from("LovetheFrogs"),
