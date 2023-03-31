@@ -171,6 +171,17 @@ async fn get_problem(num: u16) -> Result<Problem, ExitFailure> {
     Ok(prob)
 }
 
+async fn get_problem_by_pid(pid: u16) -> Result<Problem, ExitFailure> {
+    let url = format!(
+        "https://uhunt.onlinejudge.org/api/p/id/{pid}",
+    );
+
+    let url = Url::parse(&*url)?;
+    let prob = reqwest::get(url).await?.json::<Problem>().await?;
+
+    Ok(prob)
+}
+
 async fn get_submissions_problem(pid: u16, start: u16, end: u16) -> Result<Vec<Submission>, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/p/rank/{pid}/{start}/{end}",
@@ -235,6 +246,13 @@ fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
     Ok(contents)
 }
 
+fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_problem_by_pid(pid)).unwrap();
+
+    Ok(contents)
+}
+
 fn get_submissions_py(_: Python<'_>, pid: u16, start: u16, end: u16) -> PyResult<Vec<Submission>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_submissions_problem(pid, start, end)).unwrap();
@@ -276,6 +294,12 @@ mod tests {
     async fn test_get_a_problem() {
         let prob_462: Problem = get_problem(462).await.unwrap();
         assert_eq!(prob_462.pid, 403)
+    }
+
+    #[actix_rt::test]
+    async fn test_get_problem_by_pid() {
+        let prob_462: Problem = get_problem_by_pid(403).await.unwrap();
+        assert_eq!(prob_462.num, 462)
     }
 
     #[actix_rt::test]
