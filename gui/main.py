@@ -1,8 +1,8 @@
-from mainFrame import initWindow
+from mainFrame import init_window
 
 
 def main():
-    initWindow()
+    init_window()
 
 
 if __name__ == '__main__':
