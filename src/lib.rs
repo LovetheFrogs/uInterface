@@ -150,6 +150,7 @@ impl ToPyObject for UserRank {
 py_module_initializer!(u_interface, |py, m| {
     m.add(py, "__doc__", "Python module written in Rust to make requests to uHunt's API")?;
     m.add(py, "get_problem", py_fn!(py, get_problem_py(num: u16)))?;
+    m.add(py, "get_problem_pid", py_fn!(py, get_problem_by_pid_py(pid: u16)))?;
     m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
     m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
     m.add(py, "get_ranking", py_fn!(py, get_ranking_py(uid: u32, above: u16, below: u16)))?;
