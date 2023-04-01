@@ -1,7 +1,6 @@
 import platform
 import subprocess
-import tkinter as tk
-from tkhtmlview import HTMLLabel
+import webbrowser
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import customtkinter as ctk
@@ -11,9 +10,10 @@ import tempfile
 
 
 def search(master):
-    master.prob_data = ui.get_problem(int(master.search_form.get()))
-    master.pid = master.prob_data["num"]
-    Problem(master)
+    if master.pid != int(master.search_form.get()) or master.pid is None:
+        master.prob_data = ui.get_problem(int(master.search_form.get()))
+        master.pid = master.prob_data["num"]
+        Problem(master)
 
 
 def draw_graph(master):
@@ -58,10 +58,16 @@ def draw_graph(master):
     canvas.get_tk_widget().grid(row=2, column=1, padx=20, pady=(10, 20), sticky="w")
 
 
+def open_web(master):
+    webbrowser.open(
+        "https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=submit_problem&problemid"
+        "=" + str(master.prob_data["pid"]) + "&category=0")
+
+
 class Problem:
     def __init__(self, master):
         master.title("UVa Judge | Problem")
-        master.search_form = ctk.CTkEntry(master, placeholder_text="name of the problem")
+        master.search_form = ctk.CTkEntry(master, placeholder_text="number of the problem")
         master.search_form.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
         master.search_btn = ctk.CTkButton(master, text="Search", command=lambda: search(master))
         master.search_btn.grid(row=0, column=2, padx=10, pady=10, sticky="nw")
@@ -83,6 +89,7 @@ class Problem:
 
             master.problem_label = ctk.CTkLabel(master, text=f'{master.prob_data["num"]} - {master.prob_data["title"]}')
             master.problem_label.configure(font=("Arial", 18, "bold"))
-            master.problem_label.grid(row=1, column=1, sticky="nw", padx=20, pady=10)
+            master.problem_label.grid(row=1, column=1, sticky="nw", padx=10, pady=10)
+            master.submit_btn = ctk.CTkButton(master, text="Submit this problem", command=lambda: open_web(master))
+            master.submit_btn.grid(row=1, column=2, sticky="nw", padx=10)
             draw_graph(master)
-
