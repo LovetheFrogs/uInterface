@@ -17,7 +17,7 @@ def login(master):
 
 def get_prob_display(data):
     prob = ui.get_problem_pid(data)
-    return f'{prob["title"]} - {prob["num"]}'
+    return f'{prob["num"]} - {prob["title"]}'
 
 
 def get_lang_display(data):
@@ -36,29 +36,6 @@ def get_verdict_display(data):
 def build_submission_table(master):
     data = ui.get_user_submissions(master.uid, master.NUM_DATA)
     data = data["subs"]
-
-    master.style = ttk.Style(master)
-    master.style.configure("Treeview.Heading", font=("Arial", 18, "bold"))
-    master.style.configure("Treeview", font=("Arial", 16))
-    ttk.Style()
-
-    master.style.theme_use("default")
-
-    master.style.configure("Treeview",
-                           background="#2a2d2e",
-                           foreground="white",
-                           rowheight=25,
-                           fieldbackground="#343638",
-                           bordercolor="#343638",
-                           borderwidth=0)
-    master.style.map('Treeview', background=[('selected', '#22559b')])
-
-    master.style.configure("Treeview.Heading",
-                           background="#565b5e",
-                           foreground="white",
-                           relief="flat")
-    master.style.map("Treeview.Heading",
-                     background=[('active', '#3484F0')])
 
     master.table = ttk.Treeview(master, columns=("Problem", "Verdict", "Lang", "Time"), show="headings",
                                 displaycolumns=(0, 1, 2, 3))
@@ -143,9 +120,9 @@ class Profile:
             master.login_label.configure(font=("Arial", 20, "bold"))
             master.login_label.grid(row=0, column=1, padx=20, pady=10, sticky="n")
             master.login_form = ctk.CTkEntry(master, placeholder_text="UVa username")
-            master.login_form.grid(row=1, column=1, padx=10, pady=10, sticky="n")
-            master.login_btn = ctk.CTkButton(master, text="Login", command=lambda: login(master))
-            master.login_btn.grid(row=3, column=1, padx=10, pady=10, sticky="n")
+            master.login_form.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
+            master.login_btn = ctk.CTkButton(master, text="Log In", command=lambda: login(master))
+            master.login_btn.grid(row=0, column=2, padx=10, pady=10, sticky="nw")
         else:
             master.welcome_label = ctk.CTkLabel(master, text=f'Welcome {master.user}!')
             master.welcome_label.configure(font=("Arial", 20, "bold"))
