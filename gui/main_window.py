@@ -22,15 +22,17 @@ class MainWindow(ctk.CTk):
         self.user = None
         self.uid = None
         self.NUM_DATA = 5
-        self.generated_data = [True, False, False, False, False]
         self.pid = None
         self.temp = []
         self.prob_data = None
+        self.usr_data = None
+        self.rank_data = None
 
         # Configure window
         self.title("UVa Judge")
         self.geometry(f"{1100}x{500}")
         self.protocol("WM_DELETE_WINDOW", self.cleanup)
+        self.resizable(0, 0)
 
         self.style = ttk.Style(self)
         self.style.configure("Treeview.Heading", font=("Arial", 18, "bold"))
