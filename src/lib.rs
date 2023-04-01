@@ -20,6 +20,7 @@ struct Problem {
     re: u16,
     ole: u16,
     tle: u16,
+    mle: u16,
     wa: u16,
     pe: u16,
     ac: u16,
@@ -49,6 +50,7 @@ impl ToPyObject for Problem {
         dict.set_item(py, "re", self.re).unwrap();
         dict.set_item(py, "ole", self.ole).unwrap();
         dict.set_item(py, "tle", self.tle).unwrap();
+        dict.set_item(py, "mle", self.mle).unwrap();
         dict.set_item(py, "wa", self.wa).unwrap();
         dict.set_item(py, "pe", self.pe).unwrap();
         dict.set_item(py, "ac", self.ac).unwrap();
