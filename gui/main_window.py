@@ -18,11 +18,11 @@ class MainWindow(ctk.CTk):
         super().__init__()
 
         # Configure window logic
-        self.screens = [True, False, False, False, False]
+        self.screens = [True, False, False, False]
         self.user = None
         self.uid = None
         self.NUM_DATA = 5
-        self.generated_data = [True, False, False, False, False]
+        self.generated_data = [True, False, False, False]
         self.pid = None
         self.temp = []
         self.prob_data = None
@@ -106,9 +106,6 @@ class MainWindow(ctk.CTk):
             for i in range(NUM_OF_WINDOWS):
                 self.screens[i] = False
             self.screens[2] = True
-
-    def submit_event(self):
-        return
 
     def settings_event(self):
         return
