@@ -1,11 +1,9 @@
 import os
-import tkinter as tk
 from tkinter import ttk
-
 import customtkinter as ctk
-
 from gui.home import Home
 from gui.problem import Problem
+from gui.setting import Settings
 from profile import Profile
 
 ctk.set_appearance_mode("System")
@@ -108,7 +106,14 @@ class MainWindow(ctk.CTk):
             self.screens[2] = True
 
     def settings_event(self):
-        return
+        if self.screens[3]:
+            return
+        else:
+            self.clear()
+            Settings(self)
+            for i in range(NUM_OF_WINDOWS):
+                self.screens[i] = False
+            self.screens[3] = True
 
     def clear(self):
         widgets = self.winfo_children()
