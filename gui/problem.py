@@ -1,6 +1,8 @@
 import platform
 import subprocess
 import webbrowser
+from tkinter import ttk
+
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import customtkinter as ctk
@@ -8,8 +10,13 @@ import u_interface as ui
 import urllib.request
 import tempfile
 
+from gui.profile import get_verdict_display, get_lang_display
+
 
 def search(master):
+    if master.search_form.get() == '':
+        return
+
     if master.pid != int(master.search_form.get()) or master.pid is None:
         master.prob_data = ui.get_problem(int(master.search_form.get()))
         master.pid = master.prob_data["num"]
@@ -64,12 +71,89 @@ def open_web(master):
         "=" + str(master.prob_data["pid"]) + "&category=0")
 
 
+def draw_submissions(master):
+    if master.user is None:
+        return
+
+    master.uprob_data = ui.get_usubs_problem(master.uid, master.prob_data["pid"], master.NUM_DATA)
+    data = master.uprob_data[master.uid]["subs"]
+
+    if not data:
+        master.not_tried_label = ctk.CTkLabel(master, text="Make a submission to see rank")
+        master.not_tried_label.configure(font=("Arial", 16, "bold"))
+        master.not_tried_label.grid(row=2, column=1, padx=10, pady=10, sticky="e")
+
+        return
+
+    canvas = ctk.CTkCanvas(master)
+    scroll = ctk.CTkScrollbar(canvas, orientation="vertical")
+    master.table3 = ttk.Treeview(canvas, columns=("Rank", "Verdict", "Lang", "Time"), show="headings",
+                                 displaycolumns=(0, 1, 2, 3))
+    master.table3.heading("Rank", text="Rank")
+    master.table3.heading("Verdict", text="Verdict")
+    master.table3.heading("Lang", text="Lang")
+    master.table3.heading("Time", text="Time")
+    master.table3.column("Rank", width=100, anchor="center")
+    master.table3.column("Verdict", width=100, anchor="center")
+    master.table3.column("Lang", width=100, anchor="center")
+    master.table3.column("Time", width=100, anchor="center")
+    master.table3.config(height=master.NUM_DATA)
+
+    for item in reversed(data):
+        if item[6] == -1:
+            rank = "-"
+        else:
+            rank = item[6]
+        verd_disp = get_verdict_display(item[2])
+        lang_disp = get_lang_display(item[5])
+        time_disp = f'{item[3]} ms'
+
+        if verd_disp == "AC":
+            verd_bg = "#B3E6CC"  # pastel green
+        elif verd_disp == "PE":
+            verd_bg = "#FFCC99"  # pastel orange
+        elif verd_disp == "WA":
+            verd_bg = "#FF9999"  # pastel red
+        elif verd_disp == "TLE":
+            verd_bg = "#B3B3E6"  # pastel blue
+        elif verd_disp == "MLE":
+            verd_bg = "#99CCFF"  # pastel sky blue
+        elif verd_disp == "CE":
+            verd_bg = "#FFFF99"  # pastel yellow
+        elif verd_disp == "RE":
+            verd_bg = "#9999FF"  # pastel purple
+        else:
+            verd_bg = "#E6E6E6"  # pastel gray
+
+        master.table3.insert("", "end", values=(rank, verd_disp, lang_disp, time_disp), tags=verd_bg)
+
+    master.table3.tag_configure("#B3E6CC", background="#B3E6CC", foreground="black")
+    master.table3.tag_configure("#FFCC99", background="#FFCC99", foreground="black")
+    master.table3.tag_configure("#FF9999", background="#FF9999", foreground="black")
+    master.table3.tag_configure("#B3B3E6", background="#B3B3E6", foreground="black")
+    master.table3.tag_configure("#99CCFF", background="#99CCFF", foreground="black")
+    master.table3.tag_configure("#FFFF99", background="#FFFF99", foreground="black")
+    master.table3.tag_configure("#9999FF", background="#9999FF", foreground="black")
+    master.table3.tag_configure("#E6E6E6", background="#E6E6E6", foreground="black")
+    master.table3.configure(height=5, yscrollcommand=scroll.set)
+    master.table3.grid(row=0, rowspan=5, column=0, columnspan=3, sticky="nsew")
+
+    scroll.configure(command=master.table3.yview)
+    scroll.grid(row=0, column=4, rowspan=4, sticky="ns")
+
+    canvas.grid(row=2, column=2, rowspan=1, padx=20, pady=10)
+    canvas.configure(height=master.table3.winfo_reqheight(), width=master.table3.
+                     winfo_reqwidth() + scroll.winfo_reqwidth())
+    canvas.grid_propagate(False)
+
+
 class Problem:
     def __init__(self, master):
         master.title("UVa Judge | Problem")
         master.search_form = ctk.CTkEntry(master, placeholder_text="number of the problem")
         master.search_form.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
         master.search_btn = ctk.CTkButton(master, text="Search", command=lambda: search(master))
+        master.bind('<Return>', lambda x: search(master))
         master.search_btn.grid(row=0, column=2, padx=10, pady=10, sticky="nw")
         if master.pid is not None:
             with urllib.request.urlopen(ui.get_pdf_url(str(master.pid))) as response:
@@ -93,3 +177,4 @@ class Problem:
             master.submit_btn = ctk.CTkButton(master, text="Submit this problem", command=lambda: open_web(master))
             master.submit_btn.grid(row=1, column=2, sticky="nw", padx=10)
             draw_graph(master)
+            draw_submissions(master)
