@@ -41,6 +41,7 @@ struct Problem {
     rej: i32,
 }
 
+#[doc(hidden)]
 impl ToPyObject for Problem {
     type ObjectType = PyDict;
     
@@ -90,6 +91,7 @@ struct Submission {
     uname: String
 }
 
+#[doc(hidden)]
 impl ToPyObject for Submission {
     type ObjectType = PyDict;
 
@@ -120,6 +122,7 @@ struct UserSubmission {
     subs: Vec<Vec<i64>>
 }
 
+#[doc(hidden)]
 impl ToPyObject for UserSubmission {
     type ObjectType = PyDict;
 
@@ -148,6 +151,7 @@ struct UserRank {
     activity: Vec<u16>
 }
 
+#[doc(hidden)]
 impl ToPyObject for UserRank {
     type ObjectType = PyDict;
 
@@ -411,7 +415,7 @@ fn get_pdf_url_from_problem(num: String) -> String {
 
 }
 
-
+#[doc(hidden)]
 fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_problem(num)).unwrap();
@@ -419,7 +423,7 @@ fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
     Ok(contents)
 }
 
-
+#[doc(hidden)]
 fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_problem_by_pid(pid)).unwrap();
@@ -427,6 +431,7 @@ fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
     Ok(contents)
 }
 
+#[doc(hidden)]
 fn get_submissions_py(_: Python<'_>, pid: u16, start: u32, end: u32) -> PyResult<Vec<Submission>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_submissions_problem(pid, start, end)).unwrap();
@@ -434,6 +439,7 @@ fn get_submissions_py(_: Python<'_>, pid: u16, start: u32, end: u32) -> PyResult
     Ok(contents)
 }
 
+#[doc(hidden)]
 fn get_user_subs_py(_: Python<'_>, uid: u32, count: u16) -> PyResult<UserSubmission> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_user_submissions(uid, count)).unwrap();
@@ -441,6 +447,7 @@ fn get_user_subs_py(_: Python<'_>, uid: u32, count: u16) -> PyResult<UserSubmiss
     Ok(contents)
 }
 
+#[doc(hidden)]
 fn get_user_subs_to_problem_py(_: Python<'_>, uid: u32, pid: u16, count: u16) -> PyResult<HashMap<u32, UserSubmission>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_usubmissions_to_problem(uid, pid, count)).unwrap();
@@ -448,6 +455,7 @@ fn get_user_subs_to_problem_py(_: Python<'_>, uid: u32, pid: u16, count: u16) ->
     Ok(contents)
 }
 
+#[doc(hidden)]
 fn get_ranking_py(_: Python<'_>, uid: u32, above: u16, below: u16) -> PyResult<Vec<UserRank>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_ranking(uid, above, below)).unwrap();
@@ -455,6 +463,7 @@ fn get_ranking_py(_: Python<'_>, uid: u32, above: u16, below: u16) -> PyResult<V
     Ok(contents)
 }
 
+#[doc(hidden)]
 fn get_uid_py(_: Python<'_>, uname: String) -> PyResult<u32> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_uid_from_uname(uname)).unwrap();
@@ -462,9 +471,11 @@ fn get_uid_py(_: Python<'_>, uname: String) -> PyResult<u32> {
     Ok(contents)
 }
 
+#[doc(hidden)]
 fn get_pdf_url_py(_: Python, num: String) -> PyResult<String> {
     Ok(get_pdf_url_from_problem(num))
 }
+
 
 #[cfg(test)]
 mod tests {
