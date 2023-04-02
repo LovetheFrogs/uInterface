@@ -1,4 +1,6 @@
-use cpython::{PyResult, Python, py_module_initializer, py_fn, ToPyObject, PyDict, PyObject, PyList};
+use std::collections::HashMap;
+
+use cpython::{PyResult, Python, py_module_initializer, py_fn, ToPyObject, PyDict};
 use reqwest::Url;
 use exitfailure::ExitFailure;
 use serde_derive::{Deserialize, Serialize};
@@ -155,6 +157,7 @@ py_module_initializer!(u_interface, |py, m| {
     m.add(py, "get_problem_pid", py_fn!(py, get_problem_by_pid_py(pid: u16)))?;
     m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
     m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
+    m.add(py, "get_usubs_problem", py_fn!(py, get_user_subs_to_problem_py(uid: u32, pid: u16, count: u16)))?;
     m.add(py, "get_ranking", py_fn!(py, get_ranking_py(uid: u32, above: u16, below: u16)))?;
     m.add(py, "get_uid", py_fn!(py, get_uid_py(uname: String)))?;
     m.add(py, "get_pdf_url", py_fn!(py, get_pdf_url_py(num: String)))?;
@@ -203,6 +206,17 @@ async fn get_user_submissions(uid: u32, count: u16) -> Result<UserSubmission, Ex
 
     let url = Url::parse(&*url)?;
     let usubs = reqwest::get(url).await?.json::<UserSubmission>().await?;
+
+    Ok(usubs)
+}
+
+async fn get_usubmissions_to_problem(uid: u32, pid: u16, count: u16) -> Result<HashMap<u32, UserSubmission>, ExitFailure> {
+    let url = format!(
+        "https://uhunt.onlinejudge.org/api/subs-pids/{uid}/{pid}/{count}"
+    );
+
+    let url = Url::parse(&*url)?;
+    let usubs = reqwest::get(url).await?.json::<HashMap<u32, UserSubmission>>().await?;
 
     Ok(usubs)
 }
@@ -270,6 +284,13 @@ fn get_user_subs_py(_: Python<'_>, uid: u32, count: u16) -> PyResult<UserSubmiss
     Ok(contents)
 }
 
+fn get_user_subs_to_problem_py(_: Python<'_>, uid: u32, pid: u16, count: u16) -> PyResult<HashMap<u32, UserSubmission>> {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_usubmissions_to_problem(uid, pid, count)).unwrap();
+
+    Ok(contents)
+}
+
 fn get_ranking_py(_: Python<'_>, uid: u32, above: u16, below: u16) -> PyResult<Vec<UserRank>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_ranking(uid, above, below)).unwrap();
@@ -278,8 +299,8 @@ fn get_ranking_py(_: Python<'_>, uid: u32, above: u16, below: u16) -> PyResult<V
 }
 
 fn get_uid_py(_: Python<'_>, uname: String) -> PyResult<u32> {
-    let mut rt = tokio::runtime::Runtime::new().unwrap();
-    let mut contents = rt.block_on(get_uid_from_uname(uname)).unwrap();
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let contents = rt.block_on(get_uid_from_uname(uname)).unwrap();
     
     Ok(contents)
 }
@@ -322,6 +343,16 @@ mod tests {
         };
 
         assert_eq!(expected, subs);
+    }
+
+    #[actix_rt::test]
+    async fn test_usubmissions_to_problem() {
+        let uid: u32 = 1589052;
+        let subs = get_usubmissions_to_problem(uid, 403, 5).await.unwrap();
+
+        let prob = subs.get(&uid).unwrap();
+
+        assert_eq!(prob.uname, "LovetheFrogs")
     }
 
     #[actix_rt::test]
