@@ -1,6 +1,8 @@
+import linecache
 import os
 from tkinter import ttk
 import customtkinter as ctk
+
 from gui.home import Home
 from gui.problem import Problem
 from gui.setting import Settings
@@ -11,15 +13,36 @@ ctk.set_default_color_theme("green")
 NUM_OF_WINDOWS = 4
 
 
+def load_user():
+    if not os.path.exists("resources//config.conf"):
+        return None, None
+
+    usr = linecache.getline("resources//config.conf", 3, module_globals=None)
+    if usr == "" or usr == "None\n":
+        return None, None
+
+    return usr.strip(), int(linecache.getline("resources//config.conf", 4, module_globals=None).strip())
+
+
+def load_data():
+    if not os.path.exists("resources//config.conf"):
+        return 5
+
+    data = linecache.getline("resources//config.conf", 2, module_globals=None)
+    if data == "" or data == "None\n":
+        data = 5
+
+    return int(data.strip())
+
+
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
 
         # Configure window logic
         self.screens = [True, False, False, False]
-        self.user = None
-        self.uid = None
-        self.num_data = 5
+        self.user, self.uid = load_user()
+        self.num_data = load_data()
         self.generated_data = [True, False, False, False]
         self.pid = None
         self.temp = []
@@ -27,6 +50,10 @@ class MainWindow(ctk.CTk):
         self.usr_data = None
         self.rank_data = None
         self.uprob_data = None
+
+        theme = linecache.getline("resources//config.conf", 1, module_globals=None)
+        if theme != "":
+            ctk.set_appearance_mode(theme.strip())
 
         # Configure window
         self.title("UVa Judge")
@@ -120,6 +147,10 @@ class MainWindow(ctk.CTk):
                 child.destroy()
 
     def cleanup(self):
+        with open(r'resources//config.conf', 'w') as f:
+            f.writelines([str(ctk.get_appearance_mode()), "\n" + str(self.num_data),
+                          "\n" + str(self.user), "\n" + str(self.uid)])
+
         for f in self.temp:
             os.remove(f)
         self.destroy()
