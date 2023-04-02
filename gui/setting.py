@@ -7,7 +7,7 @@ def change_theme(master):
 
 def change_btn(master):
     ctk.set_default_color_theme(master.btn_menu.get())
-    master.destroy()
+    master.cleanup()
     master.__init__()
     master.settings_event()
 
