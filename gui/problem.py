@@ -20,6 +20,7 @@ def search(master):
     if master.pid != int(master.search_form.get()) or master.pid is None:
         master.prob_data = ui.get_problem(int(master.search_form.get()))
         master.pid = master.prob_data["num"]
+        master.clear()
         Problem(master)
 
 
@@ -175,6 +176,6 @@ class Problem:
             master.problem_label.configure(font=("Arial", 18, "bold"))
             master.problem_label.grid(row=1, column=1, sticky="nw", padx=10, pady=10)
             master.submit_btn = ctk.CTkButton(master, text="Submit this problem", command=lambda: open_web(master))
-            master.submit_btn.grid(row=1, column=2, sticky="nw", padx=10)
+            master.submit_btn.grid(row=1, column=2, sticky="ne", padx=10)
             draw_graph(master)
             draw_submissions(master)
