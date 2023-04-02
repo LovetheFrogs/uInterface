@@ -35,7 +35,7 @@ def get_verdict_display(data):
 
 def build_submission_table(master):
     if master.usr_data is None:
-        master.usr_data = ui.get_user_submissions(master.uid, master.NUM_DATA)
+        master.usr_data = ui.get_user_submissions(master.uid, master.num_data)
     data = master.usr_data["subs"]
 
     canvas = ctk.CTkCanvas(master)
@@ -50,7 +50,7 @@ def build_submission_table(master):
     master.table.column("Verdict", width=100, anchor="center")
     master.table.column("Lang", width=100, anchor="center")
     master.table.column("Time", width=100, anchor="center")
-    master.table.config(height=master.NUM_DATA)
+    master.table.config(height=master.num_data)
 
     for item in reversed(data):
         prob_disp = get_prob_display(item[1])
@@ -92,14 +92,14 @@ def build_submission_table(master):
     scroll.grid(row=0, column=4, rowspan=5, sticky="ns")
 
     canvas.grid(row=2, column=1, rowspan=1, padx=20, pady=10)
-    canvas.configure(height=master.table.winfo_reqheight(), width=master.table.
+    canvas.configure(height=master.table.winfo_reqheight() + master.table.winfo_reqheight() // 5, width=master.table.
                      winfo_reqwidth() + scroll.winfo_reqwidth())
     canvas.grid_propagate(False)
 
 
 def build_ranking_table(master):
     if master.rank_data is None:
-        master.rank_data = ui.get_ranking(master.uid, master.NUM_DATA // 2, master.NUM_DATA // 2)
+        master.rank_data = ui.get_ranking(master.uid, master.num_data // 2, master.num_data // 2)
 
     canvas = ctk.CTkCanvas(master)
     scroll = ctk.CTkScrollbar(canvas, orientation="vertical")
@@ -113,7 +113,7 @@ def build_ranking_table(master):
     master.table2.column("Username", width=300, anchor="center")
     master.table2.column("AC", width=100, anchor="center")
     master.table2.column("Subs", width=100, anchor="center")
-    master.table2.config(height=master.NUM_DATA)
+    master.table2.config(height=master.num_data)
 
     for item in master.rank_data:
         if item["username"] == master.user:
@@ -130,9 +130,15 @@ def build_ranking_table(master):
     scroll.grid(row=0, column=4, rowspan=5, sticky="ns")
 
     canvas.grid(row=3, column=1, rowspan=1, padx=20, pady=10)
-    canvas.configure(height=master.table2.winfo_reqheight(),
+    canvas.configure(height=master.table2.winfo_reqheight() + master.table2.winfo_reqheight() // 5,
                      width=master.table2.winfo_reqwidth() + scroll.winfo_reqwidth())
     canvas.grid_propagate(False)
+
+
+def logout(master):
+    master.user = None
+    master.clear()
+    Profile(master)
 
 
 class Profile:
@@ -151,6 +157,9 @@ class Profile:
             master.welcome_label = ctk.CTkLabel(master, text=f'Welcome {master.user}!')
             master.welcome_label.configure(font=("Arial", 20, "bold"))
             master.welcome_label.grid(row=0, column=1, padx=20, pady=10, sticky="n")
+
+            master.logout = ctk.CTkButton(master, text="Logout", command=lambda: logout(master))
+            master.logout.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
 
             master.sub_label = ctk.CTkLabel(master, text="Your last submissions & ranking position")
             master.sub_label.configure(font=("Arial", 18, "bold"))
