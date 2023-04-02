@@ -27,6 +27,7 @@ class MainWindow(ctk.CTk):
         self.prob_data = None
         self.usr_data = None
         self.rank_data = None
+        self.uprob_data = None
 
         # Configure window
         self.title("UVa Judge")
@@ -80,34 +81,25 @@ class MainWindow(ctk.CTk):
         Home(self)
 
     def home_event(self):
-        if self.screens[0]:
-            return
-        else:
-            self.clear()
-            Home(self)
-            for i in range(NUM_OF_WINDOWS):
-                self.screens[i] = False
-            self.screens[0] = True
+        self.clear()
+        Home(self)
+        for i in range(NUM_OF_WINDOWS):
+            self.screens[i] = False
+        self.screens[0] = True
 
     def profile_event(self):
-        if self.screens[1]:
-            return
-        else:
-            self.clear()
-            Profile(self)
-            for i in range(NUM_OF_WINDOWS):
-                self.screens[i] = False
-            self.screens[1] = True
+        self.clear()
+        Profile(self)
+        for i in range(NUM_OF_WINDOWS):
+            self.screens[i] = False
+        self.screens[1] = True
 
     def problem_event(self):
-        if self.screens[2]:
-            return
-        else:
-            self.clear()
-            Problem(self)
-            for i in range(NUM_OF_WINDOWS):
-                self.screens[i] = False
-            self.screens[2] = True
+        self.clear()
+        Problem(self)
+        for i in range(NUM_OF_WINDOWS):
+            self.screens[i] = False
+        self.screens[2] = True
 
     def submit_event(self):
         return
