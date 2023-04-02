@@ -8,7 +8,7 @@ from profile import Profile
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("green")
-NUM_OF_WINDOWS = 5
+NUM_OF_WINDOWS = 4
 
 
 class MainWindow(ctk.CTk):
@@ -19,7 +19,7 @@ class MainWindow(ctk.CTk):
         self.screens = [True, False, False, False]
         self.user = None
         self.uid = None
-        self.NUM_DATA = 5
+        self.num_data = 5
         self.generated_data = [True, False, False, False]
         self.pid = None
         self.temp = []
