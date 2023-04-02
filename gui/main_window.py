@@ -30,7 +30,7 @@ def load_data():
 
     data = linecache.getline("resources//config.conf", 2, module_globals=None)
     if data == "" or data == "None\n":
-        data = 5
+        return 5
 
     return int(data.strip())
 
