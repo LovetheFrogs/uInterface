@@ -1,16 +1,14 @@
 import os
-import tkinter as tk
 from tkinter import ttk
-
 import customtkinter as ctk
-
 from gui.home import Home
 from gui.problem import Problem
+from gui.setting import Settings
 from profile import Profile
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("green")
-NUM_OF_WINDOWS = 5
+NUM_OF_WINDOWS = 4
 
 
 class MainWindow(ctk.CTk):
@@ -18,10 +16,11 @@ class MainWindow(ctk.CTk):
         super().__init__()
 
         # Configure window logic
-        self.screens = [True, False, False, False, False]
+        self.screens = [True, False, False, False]
         self.user = None
         self.uid = None
-        self.NUM_DATA = 5
+        self.num_data = 5
+        self.generated_data = [True, False, False, False]
         self.pid = None
         self.temp = []
         self.prob_data = None
@@ -101,11 +100,15 @@ class MainWindow(ctk.CTk):
             self.screens[i] = False
         self.screens[2] = True
 
-    def submit_event(self):
-        return
-
     def settings_event(self):
-        return
+        if self.screens[3]:
+            return
+        else:
+            self.clear()
+            Settings(self)
+            for i in range(NUM_OF_WINDOWS):
+                self.screens[i] = False
+            self.screens[3] = True
 
     def clear(self):
         widgets = self.winfo_children()

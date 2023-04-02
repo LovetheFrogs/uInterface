@@ -75,7 +75,7 @@ def draw_submissions(master):
     if master.user is None:
         return
 
-    master.uprob_data = ui.get_usubs_problem(master.uid, master.prob_data["pid"], master.NUM_DATA)
+    master.uprob_data = ui.get_usubs_problem(master.uid, master.prob_data["pid"], master.num_data)
     data = master.uprob_data[master.uid]["subs"]
 
     if not data:
@@ -97,7 +97,7 @@ def draw_submissions(master):
     master.table3.column("Verdict", width=100, anchor="center")
     master.table3.column("Lang", width=100, anchor="center")
     master.table3.column("Time", width=100, anchor="center")
-    master.table3.config(height=master.NUM_DATA)
+    master.table3.config(height=master.num_data)
 
     for item in reversed(data):
         if item[6] == -1:
@@ -142,7 +142,7 @@ def draw_submissions(master):
     scroll.grid(row=0, column=4, rowspan=4, sticky="ns")
 
     canvas.grid(row=2, column=2, rowspan=1, padx=20, pady=10)
-    canvas.configure(height=master.table3.winfo_reqheight(), width=master.table3.
+    canvas.configure(height=master.table3.winfo_reqheight() + master.table3.winfo_reqheight() // 5, width=master.table3.
                      winfo_reqwidth() + scroll.winfo_reqwidth())
     canvas.grid_propagate(False)
 
