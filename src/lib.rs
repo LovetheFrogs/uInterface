@@ -1,3 +1,12 @@
+//! Module containing different get request to the uHunt API
+//! 
+//! The requests are used to get certain data and are always organized into structs (or collections of a struct).
+//! This API request get data from the Universidad de Valladolid competitive programming judge.
+//! 
+//! This library can be used both in Rust and in python, as building it with `maturin develop` creates a python 
+//! module.
+//! 
+
 use std::collections::HashMap;
 
 use cpython::{PyResult, Python, py_module_initializer, py_fn, ToPyObject, PyDict};
@@ -5,6 +14,7 @@ use reqwest::Url;
 use exitfailure::ExitFailure;
 use serde_derive::{Deserialize, Serialize};
 
+/// A struct holding the data asociated with a problem
 #[derive(Serialize, Deserialize, Debug)]
 struct Problem {
     pid: u16,
@@ -34,6 +44,7 @@ struct Problem {
 impl ToPyObject for Problem {
     type ObjectType = PyDict;
     
+    /// Conversion of a Problem struct into a Python dictionary
     fn to_py_object(&self, py: Python) -> PyDict {
         let dict = PyDict::new(py);
 
@@ -64,6 +75,7 @@ impl ToPyObject for Problem {
     }
 }
 
+/// A Struct holding data for a problem submission
 #[derive(Serialize, Deserialize, Debug)]
 struct Submission {
     sid: i64,
@@ -81,6 +93,7 @@ struct Submission {
 impl ToPyObject for Submission {
     type ObjectType = PyDict;
 
+    /// Conversion of a Submission struct into a Python dictionary
     fn to_py_object(&self, py: Python) -> PyDict {
         let dict = PyDict::new(py);
 
@@ -99,6 +112,7 @@ impl ToPyObject for Submission {
     }
 }
 
+/// A struct holding data for an user's submissions
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 struct UserSubmission {
     name: String,
@@ -109,6 +123,7 @@ struct UserSubmission {
 impl ToPyObject for UserSubmission {
     type ObjectType = PyDict;
 
+    /// Conversiom of a UserSubmission struct into a Python dictionary
     fn to_py_object(&self, py: Python) -> PyDict {
         let dict = PyDict::new(py);
         
@@ -120,6 +135,7 @@ impl ToPyObject for UserSubmission {
     }
 }
 
+/// A struct holding data for the position in the ranking of a user
 #[derive(Serialize, Deserialize, Debug)]
 struct UserRank {
     rank: u32,
@@ -135,6 +151,7 @@ struct UserRank {
 impl ToPyObject for UserRank {
     type ObjectType = PyDict;
 
+    /// COnversion of a UserRank into a Python dictionary
     fn to_py_object(&self, py: Python) -> PyDict {
         let dict = PyDict::new(py);
 
@@ -155,7 +172,7 @@ py_module_initializer!(u_interface, |py, m| {
     m.add(py, "__doc__", "Python module written in Rust to make requests to uHunt's API")?;
     m.add(py, "get_problem", py_fn!(py, get_problem_py(num: u16)))?;
     m.add(py, "get_problem_pid", py_fn!(py, get_problem_by_pid_py(pid: u16)))?;
-    m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u16, end: u16)))?;
+    m.add(py, "get_submissions", py_fn!(py, get_submissions_py(pid: u16, start: u32, end: u32)))?;
     m.add(py, "get_user_submissions", py_fn!(py, get_user_subs_py(uid: u32, count: u16)))?;
     m.add(py, "get_usubs_problem", py_fn!(py, get_user_subs_to_problem_py(uid: u32, pid: u16, count: u16)))?;
     m.add(py, "get_ranking", py_fn!(py, get_ranking_py(uid: u32, above: u16, below: u16)))?;
@@ -164,7 +181,22 @@ py_module_initializer!(u_interface, |py, m| {
     Ok(())
 });
 
-
+/// Returns the problem with number `num`, or an empty struct if it
+/// does not exist. This function is async, that means it has to be
+/// called inside an async function/method or using `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `num` - An unsigned, 16 bit number indicating the number of the
+/// problem.
+/// 
+/// # Examples 
+/// 
+/// ```
+/// // Returns the 462nd problem
+/// let problem: Problem = get_problem(462).await?;
+/// ```
+/// 
 async fn get_problem(num: u16) -> Result<Problem, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/p/num/{}",
@@ -177,6 +209,22 @@ async fn get_problem(num: u16) -> Result<Problem, ExitFailure> {
     Ok(prob)
 }
 
+
+/// Returns the problem with id `pid`, or an empty struct if it does
+/// not exist. This function is async, that means it has to be
+/// called inside an async function/method or using `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `pid` - An unsigned, 16 bit number indicating the id of the problem.
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Returns the problem with id 403
+/// let problem: Problem = get_problem_by_pid(403).await?;
+/// ```
+/// 
 async fn get_problem_by_pid(pid: u16) -> Result<Problem, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/p/id/{pid}",
@@ -188,7 +236,27 @@ async fn get_problem_by_pid(pid: u16) -> Result<Problem, ExitFailure> {
     Ok(prob)
 }
 
-async fn get_submissions_problem(pid: u16, start: u16, end: u16) -> Result<Vec<Submission>, ExitFailure> {
+/// Returns a vector containing the submissions to a certain problem in 
+/// a certain timeframe. This function is async, that means it has to be 
+/// called inside an async function/method or using `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `pid` - An unsigned, 16 bit number indicating the id of the problem.
+/// * `start` - An unsigned, 32 bit number indicating the start of the timeframe,
+/// stated in Unix timestamp.
+/// * `end` - An unsigned, 32 bit number indicating the end of the timeframe,
+/// stated in Unix timestamp.
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Returns the submisions to problem with id 403, from 01/01/2023 - 12:00 to
+/// // 01/02/2023 - 12:00
+/// let sub: Vec<Submission> = get_submissions_problem(403, 1672531200, 1675209600).await?;
+/// ```
+/// 
+async fn get_submissions_problem(pid: u16, start:u32, end: u32) -> Result<Vec<Submission>, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/p/rank/{pid}/{start}/{end}",
     );
@@ -199,6 +267,24 @@ async fn get_submissions_problem(pid: u16, start: u16, end: u16) -> Result<Vec<S
     Ok(sub)
 }
 
+/// Returns the user's last submissions to any problem. This function is async, 
+/// that means it has to be called inside an async function/method or using 
+/// `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `uid` - An unsigned, 32 bit number indicating the id of the user
+/// * `count` - An unsigned, 16 bit number indicating the number of submissions.
+/// to show. Note this number is capped at 100 and will return an error if.
+/// it is more than this.
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Returns the last 5 submissions of user LovetheFrogs
+/// let user_subs: UserSubmission = get_user_submissions(1589052, 5).await?;
+/// ```
+/// 
 async fn get_user_submissions(uid: u32, count: u16) -> Result<UserSubmission, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/subs-user-last/{uid}/{count}"
@@ -210,6 +296,26 @@ async fn get_user_submissions(uid: u32, count: u16) -> Result<UserSubmission, Ex
     Ok(usubs)
 }
 
+/// Returns a HashMap containing the submissions the speccified user to 
+/// the selected problem. This function is async, that means it has to be called 
+/// inside an async function/method or using `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `uid` - An unsigned, 32 bit number indicating the id of the user.
+/// * `pid` - An unsigned, 16 bit number indicating the id of the problem.
+/// * `count` - An unsigned, 16 bit number indicating the number of submissions.
+/// to show. Note this number is capped at 100 and will return an error if.
+/// it is more than this.
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Return the last 5 submissions of user LovetheFrogs to problem with id
+/// // 403.
+/// let usubs_prob: HashMap<u32, UserSubmission> = get_usubmissions_to_problem(1589052, 403,5).await?;
+/// ```
+/// 
 async fn get_usubmissions_to_problem(uid: u32, pid: u16, count: u16) -> Result<HashMap<u32, UserSubmission>, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/subs-pids/{uid}/{pid}/{count}"
@@ -221,6 +327,26 @@ async fn get_usubmissions_to_problem(uid: u32, pid: u16, count: u16) -> Result<H
     Ok(usubs)
 }
 
+/// Returns a Vector containing the Rank of the `above` users over the user 
+/// with id `uid`, the user with that id and the `below` users, below the
+/// asme user. This function is async, that means it has to be called 
+/// inside an async function/method or using `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `uid` - An unsigned, 32 bit number indicating the id of the user.
+/// * `above` - An unsigned, 16 bit number indicating the number of users
+/// to show above user wit id `pid`.
+/// * `below` - An unsigned, 16 bit number indicating the number of users
+/// to show below user wit id `pid`.
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Return the 2 users' rankings above and below the user LovetheFrogs
+/// let uranking: Vec<UserRank> = get_ranking(1589052, 2, 2).await?;
+/// ```
+/// 
 async fn get_ranking(uid: u32, above: u16, below: u16) -> Result<Vec<UserRank>, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/ranklist/{uid}/{above}/{below}"
@@ -232,6 +358,22 @@ async fn get_ranking(uid: u32, above: u16, below: u16) -> Result<Vec<UserRank>, 
     Ok(rank)
 }
 
+/// Returns the user's id number by searching using the stated username.
+/// This function is async, that means it has to be called inside an async 
+/// function/method or using `tokio::Runtime.block_on()`.
+/// 
+/// # Arguments
+/// 
+/// * `uname` - A String that is the username of the user whose id we want to
+/// obtain
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Get the id of the user "LovetheFrogs"
+/// let uid: u32 = get_uid_from_uname(String::from("LovetheFrogs")).await?;
+/// ```
+/// 
 async fn get_uid_from_uname(uname: String) -> Result<u32, ExitFailure> {
     let url = format!(
         "https://uhunt.onlinejudge.org/api/uname2uid/{uname}"
@@ -243,6 +385,20 @@ async fn get_uid_from_uname(uname: String) -> Result<u32, ExitFailure> {
     Ok(uid)
 }
 
+/// Returns the URL of a pdf for a certain problem number.
+/// 
+/// # Arguments
+/// 
+/// * `num` - A String containing the number of the problem. A String is 
+/// used instead of an u16 so operations with its contents can be done easier.
+/// 
+/// # Examples
+/// 
+/// ```
+/// // Get the URL of the pdf for the problem 462
+/// let url: String = get_pdf_from_problem(String::from("462"));
+/// ```
+/// 
 fn get_pdf_url_from_problem(num: String) -> String {
     let prelude = match num.len() {
         3 => &num[..1],
@@ -263,6 +419,7 @@ fn get_problem_py(_: Python<'_>, num: u16) -> PyResult<Problem> {
     Ok(contents)
 }
 
+
 fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_problem_by_pid(pid)).unwrap();
@@ -270,7 +427,7 @@ fn get_problem_by_pid_py(_: Python<'_>, pid: u16) -> PyResult<Problem> {
     Ok(contents)
 }
 
-fn get_submissions_py(_: Python<'_>, pid: u16, start: u16, end: u16) -> PyResult<Vec<Submission>> {
+fn get_submissions_py(_: Python<'_>, pid: u16, start: u32, end: u32) -> PyResult<Vec<Submission>> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let contents = rt.block_on(get_submissions_problem(pid, start, end)).unwrap();
     
