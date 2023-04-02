@@ -34,10 +34,13 @@ def get_verdict_display(data):
 
 
 def build_submission_table(master):
-    data = ui.get_user_submissions(master.uid, master.NUM_DATA)
-    data = data["subs"]
+    if master.usr_data is None:
+        master.usr_data = ui.get_user_submissions(master.uid, master.NUM_DATA)
+    data = master.usr_data["subs"]
 
-    master.table = ttk.Treeview(master, columns=("Problem", "Verdict", "Lang", "Time"), show="headings",
+    canvas = ctk.CTkCanvas(master)
+    scroll = ctk.CTkScrollbar(canvas, orientation="vertical")
+    master.table = ttk.Treeview(canvas, columns=("Problem", "Verdict", "Lang", "Time"), show="headings",
                                 displaycolumns=(0, 1, 2, 3))
     master.table.heading("Problem", text="Problem")
     master.table.heading("Verdict", text="Verdict")
@@ -49,11 +52,11 @@ def build_submission_table(master):
     master.table.column("Time", width=100, anchor="center")
     master.table.config(height=master.NUM_DATA)
 
-    for i in range(master.NUM_DATA - 1, -1, -1):
-        prob_disp = get_prob_display(data[i][1])
-        verd_disp = get_verdict_display(data[i][2])
-        lang_disp = get_lang_display(data[i][5])
-        time_disp = f'{data[i][3]} ms'
+    for item in reversed(data):
+        prob_disp = get_prob_display(item[1])
+        verd_disp = get_verdict_display(item[2])
+        lang_disp = get_lang_display(item[5])
+        time_disp = f'{item[3]} ms'
 
         if verd_disp == "AC":
             verd_bg = "#B3E6CC"  # pastel green
@@ -82,14 +85,25 @@ def build_submission_table(master):
     master.table.tag_configure("#FFFF99", background="#FFFF99", foreground="black")
     master.table.tag_configure("#9999FF", background="#9999FF", foreground="black")
     master.table.tag_configure("#E6E6E6", background="#E6E6E6", foreground="black")
-    master.table.grid(row=2, rowspan=1, column=1, padx=20, pady=10)
+    master.table.configure(height=5, yscrollcommand=scroll.set)
+    master.table.grid(row=0, rowspan=5, column=0, columnspan=4, sticky="nsew")
+
+    scroll.configure(command=master.table.yview)
+    scroll.grid(row=0, column=4, rowspan=5, sticky="ns")
+
+    canvas.grid(row=2, column=1, rowspan=1, padx=20, pady=10)
+    canvas.configure(height=master.table.winfo_reqheight(), width=master.table.
+                     winfo_reqwidth() + scroll.winfo_reqwidth())
+    canvas.grid_propagate(False)
 
 
 def build_ranking_table(master):
-    data = ui.get_ranking(master.uid, master.NUM_DATA // 2, master.NUM_DATA // 2)
-    a = data[0]
+    if master.rank_data is None:
+        master.rank_data = ui.get_ranking(master.uid, master.NUM_DATA // 2, master.NUM_DATA // 2)
 
-    master.table2 = ttk.Treeview(master, columns=("Rank", "Username", "AC", "Subs"), show="headings",
+    canvas = ctk.CTkCanvas(master)
+    scroll = ctk.CTkScrollbar(canvas, orientation="vertical")
+    master.table2 = ttk.Treeview(canvas, columns=("Rank", "Username", "AC", "Subs"), show="headings",
                                  displaycolumns=(0, 1, 2, 3))
     master.table2.heading("Rank", text="Rank")
     master.table2.heading("Username", text="Username")
@@ -101,7 +115,7 @@ def build_ranking_table(master):
     master.table2.column("Subs", width=100, anchor="center")
     master.table2.config(height=master.NUM_DATA)
 
-    for item in data:
+    for item in master.rank_data:
         if item["username"] == master.user:
             bg_color = "#D3D3D3"  # darker grey
         else:
@@ -109,7 +123,16 @@ def build_ranking_table(master):
         master.table2.insert("", "end", values=(item["rank"], item["username"], item["ac"], item["nos"]), tags=bg_color)
 
     master.table2.tag_configure("#D3D3D3", background="#D3D3D3", foreground="black")
-    master.table2.grid(row=3, rowspan=1, column=1, padx=20, pady=10, sticky="n")
+    master.table2.configure(height=5, yscrollcommand=scroll.set)
+    master.table2.grid(row=0, rowspan=5, column=0, columnspan=4, sticky="nsew")
+
+    scroll.configure(command=master.table2.yview)
+    scroll.grid(row=0, column=4, rowspan=5, sticky="ns")
+
+    canvas.grid(row=3, column=1, rowspan=1, padx=20, pady=10)
+    canvas.configure(height=master.table2.winfo_reqheight(),
+                     width=master.table2.winfo_reqwidth() + scroll.winfo_reqwidth())
+    canvas.grid_propagate(False)
 
 
 class Profile:
@@ -122,6 +145,7 @@ class Profile:
             master.login_form = ctk.CTkEntry(master, placeholder_text="UVa username")
             master.login_form.grid(row=0, column=1, padx=10, pady=10, sticky="ne")
             master.login_btn = ctk.CTkButton(master, text="Log In", command=lambda: login(master))
+            master.bind('<Return>', lambda x: login(master))
             master.login_btn.grid(row=0, column=2, padx=10, pady=10, sticky="nw")
         else:
             master.welcome_label = ctk.CTkLabel(master, text=f'Welcome {master.user}!')
@@ -133,5 +157,3 @@ class Profile:
             master.sub_label.grid(row=1, column=1, padx=20, pady=10)
             build_submission_table(master)
             build_ranking_table(master)
-
-            master.generated_data[1] = True
