@@ -10,7 +10,7 @@ import u_interface as ui
 import urllib.request
 import tempfile
 
-from gui.profile import get_verdict_display, get_lang_display
+from profile import get_verdict_display, get_lang_display
 
 
 def search(master):
