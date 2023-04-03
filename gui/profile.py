@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import u_interface as ui
 from tkinter import ttk
-import tkinter as tk
 
 
 def login(master):
