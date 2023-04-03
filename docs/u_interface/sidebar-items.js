@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["PyInit_u_interface",""]]};
