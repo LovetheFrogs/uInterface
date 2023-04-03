@@ -3,9 +3,9 @@ import os
 from tkinter import ttk
 import customtkinter as ctk
 
-from gui.home import Home
-from gui.problem import Problem
-from gui.setting import Settings
+from home import Home
+from problem import Problem
+from setting import Settings
 from profile import Profile
 
 ctk.set_appearance_mode("System")
