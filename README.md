@@ -1,3 +1,10 @@
+[![Known Vulnerabilities](https://snyk.io/test/github/dwyl/hapi-auth-jwt2/badge.svg?targetFile=package.json)](https://snyk.io/test/github/LovetheFrogs/uInterface?targetFile=package.json)
+[![Code Climate](https://codeclimate.com/github/dwyl/esta/badges/gpa.svg)](https://codeclimate.com/github/LovetheFrogs/uInterface)
+![PyPI](https://img.shields.io/pypi/v/uInterface)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/lovethefrogs?country.x=ES&locale.x=es_ES)
+[![hits](https://hits.deltapapa.io/github/LovetheFrogs/uInterface.svg)](https://hits.deltapapa.io)
+
+
 # uInterface
 
 ## Table of contents
@@ -26,7 +33,7 @@ In order to install and use uInterface, you will have to follow the installation
 
 #### Windows
 
-Windows installation is as easy as it gets. Just go to [releases](https://github.com/LovetheFrogs/uInterface/releases) and download the latest version of the uInterface windows executable (.exe).
+To install the application on Windows ust go to [releases](https://github.com/LovetheFrogs/uInterface/releases) and download the project. Make sure all dependencies are installed by running `python setup.py install`. Then, navigate to gui/ and execute 
 
 #### Linux
 
