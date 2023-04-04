@@ -33,7 +33,7 @@ In order to install and use uInterface, you will have to follow the installation
 
 #### Windows
 
-Windows installation is as easy as it gets. Just go to [releases](https://github.com/LovetheFrogs/uInterface/releases) and download the latest version of the uInterface windows executable (.exe).
+To install the application on Windows ust go to [releases](https://github.com/LovetheFrogs/uInterface/releases) and download the project. Make sure all dependencies are installed by running `python setup.py install`. Then, navigate to gui/ and execute 
 
 #### Linux
 
