@@ -63,7 +63,7 @@ uInterface=1.0.0
 
 ### How to use uInterface library
 
-To get a look on how to use these libraries, go to the PyPI/crates.io page for the libraries ([Mentions & bibliograpy](#mentions--bibliography)) and read the full documentation, which contains the functions implemented by this libraries.
+To get a look on how to use these libraries, go to the PyPI/crates.io page for the libraries ([Mentions & bibliograpy](#mentions--bibliography)) and read the full documentation, which contains the functions implemented by this libraries. To check Python documentation, head over to gui/docs.md
 
 ## Contributing
 
