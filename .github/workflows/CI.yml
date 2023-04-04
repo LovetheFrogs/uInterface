@@ -24,6 +24,10 @@ jobs:
         target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
     steps:
       - uses: actions/checkout@v3
+      - name: Install OpenSSL development headers
+      	run: |
+        sudo apt-get update
+        sudo apt-get install -y libssl-dev
       - name: Install Rust
         run: curl https://sh.rustup.rs -sSf | sh -s -- -y
       - uses: actions/setup-python@v4
