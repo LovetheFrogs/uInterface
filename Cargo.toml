@@ -6,6 +6,17 @@ edition = "2021"
 license = "Apache-2.0"
 documentation = "https://lovethefrogs.github.io/uInterface/u_interface/index.html"
 repository = "https://github.com/LovetheFrogs/uInterface"
+exclude = [
+    ".github/*",
+    "gui/*",
+    ".gitattributes",
+    ".gitignore",
+    "create-docu.sh",
+    "pyproject.toml",
+    "requirements.txt",
+    "run_linux.sh",
+    "setup.py",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
