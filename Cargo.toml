@@ -1,7 +1,11 @@
 [package]
 name = "u_interface"
-version = "0.1.0"
+description = "Crate to allow easy requests to uHunt's API"
+version = "1.0.0"
 edition = "2021"
+license = "Apache-2.0"
+documentation = "https://lovethefrogs.github.io/uInterface/u_interface/index.html"
+repository = "https://github.com/LovetheFrogs/uInterface"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
