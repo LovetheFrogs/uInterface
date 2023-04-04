@@ -12,7 +12,7 @@
     * [How to install uInterface library](#how-to-install-uinterface-library)
     * [How to use uInterface library](#how-to-use-uinterface-library)
 4. [Contributing](#contributing)
-5. [Mentions & bibliography](#mentions--bibliograophy)
+5. [Mentions & bibliography](#mentions--bibliography)
 
 ## uInterface (GUI application)
 
