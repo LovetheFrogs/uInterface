@@ -1,3 +1,4 @@
+#!/bin/bash
 cargo doc --document-private-items --no-deps
 rm -rf ./docs
 touch target/doc/index.html
