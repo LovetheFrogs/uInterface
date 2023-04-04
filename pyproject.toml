@@ -14,3 +14,4 @@ classifiers = [
 
 [tool.maturin]
 features = ["cpython/extension-module"]
+sdist-include = ["LICENSE", "gui/docs.md"]
